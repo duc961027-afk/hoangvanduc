@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="5가지 음료의 환경 발자국을 제품 1L 기준으로 비교하는 데이터 대시보드" />
+  <title>같은 1L, 다른 환경발자국</title>
+
+  <!-- Tailwind CSS: 빠르고 일관된 반응형 레이아웃 -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js: 데이터 기반 가로 막대 차트 -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --milk: #7B88A8;   /* Soft Slate Blue */
+      --soy: #D48C7B;    /* Soft Terracotta */
+      --oat: #7E9E88;    /* Sage Green */
+      --almond: #C4A47C; /* Warm Sand Brown */
+      --rice: #9B89B3;   /* Muted Lavender */
+      --ink: #18212f;
+      --muted: #7b8492;
+      --line: #e9edf2;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: Inter, "Pretendard", "Noto Sans KR", system-ui, sans-serif; color: var(--ink); }
+    .drink-dot { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+    .chart-wrap { position: relative; height: 290px; }
+    @media (max-width: 640px) { .chart-wrap { height: 260px; } }
+    .pixel-rule { height: 4px; width: 36px; background: var(--ink); image-rendering: pixelated; }
+    .kpi-card { transition: transform .2s ease, box-shadow .2s ease; }
+    .kpi-card:hover { transform: translateY(-3px); box-shadow: 0 14px 30px rgba(24,33,47,.06); }
+  </style>
+</head>
+<body class="bg-white antialiased">
+  <main class="mx-auto max-w-6xl px-5 sm:px-8">
+    <!-- HEADER / HERO -->
+    <header class="pt-16 pb-12 sm:pt-24 sm:pb-16">
+      <div class="flex items-center gap-3 text-xs font-bold uppercase tracking-[.2em] text-slate-500">
+        <span class="pixel-rule"></span> Design · Sustainability · Data
+      </div>
+      <h1 class="mt-7 max-w-4xl text-5xl font-black leading-[1.02] tracking-[-.07em] sm:text-7xl lg:text-8xl">
+        같은 1L,<br /><span class="text-slate-400">다른 환경발자국.</span>
+      </h1>
+      <p class="mt-6 max-w-2xl text-base leading-8 text-slate-500 sm:text-lg">
+        같은 양의 음료라도 생산 과정에서 남기는 환경의 흔적은 다릅니다.
+        5가지 음료를 제품 1L 기준으로 비교해 보세요.
+      </p>
+
+      <!-- KPI CARDS -->
+      <section aria-label="핵심 지표" class="mt-12 grid gap-4 sm:grid-cols-3">
+        <article class="kpi-card rounded-2xl border border-slate-200 p-6 sm:p-7">
+          <p class="text-sm font-semibold text-slate-500">탄소 배출량 최댓값</p>
+          <p class="mt-4 text-3xl font-extrabold tracking-tight">우유 <span class="text-slate-400">3.15</span></p>
+          <p class="mt-2 text-xs text-slate-400">kg CO₂eq / 제품 1L</p>
+        </article>
+        <article class="kpi-card rounded-2xl border border-slate-200 p-6 sm:p-7">
+          <p class="text-sm font-semibold text-slate-500">담수 사용량 최솟값</p>
+          <p class="mt-4 text-3xl font-extrabold tracking-tight">두유 <span class="text-slate-400">27.80</span></p>
+          <p class="mt-2 text-xs text-slate-400">L / 제품 1L</p>
+        </article>
+        <article class="kpi-card rounded-2xl border border-slate-200 p-6 sm:p-7">
+          <p class="text-sm font-semibold text-slate-500">토지 사용량 최솟값</p>
+          <p class="mt-4 text-3xl font-extrabold tracking-tight">쌀 <span class="text-slate-400">0.34</span></p>
+          <p class="mt-2 text-xs text-slate-400">m² / 제품 1L</p>
+        </article>
+      </section>
+    </header>
+
+    <!-- VISUALIZATION -->
+    <section class="border-t border-slate-100 py-12 sm:py-16" aria-labelledby="visual-title">
+      <div class="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+        <div>
+          <p class="text-xs font-bold uppercase tracking-[.18em] text-slate-400">Environmental footprint</p>
+          <h2 id="visual-title" class="mt-3 text-3xl font-extrabold tracking-[-.05em] sm:text-4xl">환경 영향, 세 가지 관점</h2>
+        </div>
+        <p class="text-sm text-slate-400">제품 1L 기준 · 모든 축은 0부터</p>
+      </div>
+
+      <!-- Consistent legend: identical color mapping across all charts -->
+      <div class="mt-7 flex flex-wrap gap-x-5 gap-y-3" aria-label="음료 색상 범례">
+        <span class="flex items-center gap-2 text-sm text-slate-600"><i class="drink-dot" style="background:var(--milk)"></i>우유</span>
+        <span class="flex items-center gap-2 text-sm text-slate-600"><i class="drink-dot" style="background:var(--soy)"></i>두유</span>
+        <span class="flex items-center gap-2 text-sm text-slate-600"><i class="drink-dot" style="background:var(--oat)"></i>귀리</span>
+        <span class="flex items-center gap-2 text-sm text-slate-600"><i class="drink-dot" style="background:var(--almond)"></i>아몬드</span>
+        <span class="flex items-center gap-2 text-sm text-slate-600"><i class="drink-dot" style="background:var(--rice)"></i>쌀</span>
+      </div>
+
+      <div class="mt-8 grid gap-5">
+        <article class="rounded-2xl border border-slate-200 p-5 sm:p-7">
+          <div class="mb-5 flex flex-wrap items-baseline justify-between gap-2">
+            <h3 class="text-lg font-bold">01 / 온실가스 배출량</h3>
+            <span class="text-xs text-slate-400">kg CO₂eq · 제품 1L</span>
+          </div>
+          <div class="chart-wrap"><canvas id="emissionsChart" aria-label="음료별 온실가스 배출량 가로 막대 차트"></canvas></div>
+        </article>
+        <article class="rounded-2xl border border-slate-200 p-5 sm:p-7">
+          <div class="mb-5 flex flex-wrap items-baseline justify-between gap-2">
+            <h3 class="text-lg font-bold">02 / 담수 사용량</h3>
+            <span class="text-xs text-slate-400">L · 제품 1L</span>
+          </div>
+          <div class="chart-wrap"><canvas id="waterChart" aria-label="음료별 담수 사용량 가로 막대 차트"></canvas></div>
+        </article>
+        <article class="rounded-2xl border border-slate-200 p-5 sm:p-7">
+          <div class="mb-5 flex flex-wrap items-baseline justify-between gap-2">
+            <h3 class="text-lg font-bold">03 / 토지 사용량</h3>
+            <span class="text-xs text-slate-400">m² · 제품 1L</span>
+          </div>
+          <div class="chart-wrap"><canvas id="landChart" aria-label="음료별 토지 사용량 가로 막대 차트"></canvas></div>
+        </article>
+      </div>
+    </section>
+
+    <!-- INSIGHT / FOOTER -->
+    <section class="my-12 rounded-3xl bg-slate-50 px-6 py-9 sm:my-16 sm:px-10 sm:py-12">
+      <p class="text-xs font-bold uppercase tracking-[.18em] text-slate-400">Strategic insight</p>
+      <p class="mt-4 max-w-4xl text-2xl font-bold leading-snug tracking-[-.04em] sm:text-3xl">
+        우유는 세 지표 모두 높은 환경 부담을 보이며, 식물성 음료끼리도 물과 토지 사용량은 서로 다르게 나타납니다.
+      </p>
+    </section>
+    <footer class="border-t border-slate-200 py-8 text-xs leading-6 text-slate-400">
+      <p class="font-semibold text-slate-500">DATA SOURCE</p>
+      <p>Poore &amp; Nemecek (2018), <em>Reducing food’s environmental impacts through producers and consumers</em> · Our World in Data, “Environmental footprint of milks” (2022-01-19).</p>
+      <p>제품 1L 기준 연구 기반 비교값이며, 실제 브랜드·지역·생산 방식에 따라 값은 달라질 수 있습니다.</p>
+      <a class="mt-2 inline-block underline underline-offset-4 hover:text-slate-700" href="https://ourworldindata.org/grapher/environmental-footprint-milks" target="_blank" rel="noopener noreferrer">원자료 및 시각화 출처 ↗</a>
+    </footer>
+  </main>
+
+<script>
+  // --------------------------------------------
+  // DATA: '01_시연데이터' 시트에서 확인한 제품 1L 기준 값
+  // 색상은 모든 차트에서 같은 음료에 동일하게 적용됩니다.
+  // --------------------------------------------
+  const drinks = [
+    { name: "우유", color: "#7B88A8", emissions: 3.15, water: 628.20, land: 8.95 },
+    { name: "두유", color: "#D48C7B", emissions: 0.98, water: 27.80,  land: 0.66 },
+    { name: "귀리", color: "#7E9E88", emissions: 0.90, water: 48.24,  land: 0.76 },
+    { name: "아몬드", color: "#C4A47C", emissions: 0.70, water: 371.46, land: 0.50 },
+    { name: "쌀", color: "#9B89B3", emissions: 1.18, water: 269.81, land: 0.34 }
+  ];
+
+  // 공통 Chart.js 설정: 가로 막대 + 축 0 시작 + 불필요한 장식 최소화
+  function createHorizontalBarChart(canvasId, metricKey, unit, decimalPlaces = 2) {
+    const canvas = document.getElementById(canvasId);
+    const values = drinks.map(drink => drink[metricKey]);
+    const maxValue = Math.max(...values);
+
+    return new Chart(canvas, {
+      type: "bar",
+      data: {
+        labels: drinks.map(drink => drink.name),
+        datasets: [{
+          label: unit,
+          data: values,
+          backgroundColor: drinks.map(drink => drink.color),
+          borderRadius: 5,
+          borderSkipped: false,
+          barThickness: 19,
+          maxBarThickness: 24
+        }]
+      },
+      options: {
+        indexAxis: "y",
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: { duration: 650 },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: "#18212f",
+            padding: 12,
+            callbacks: {
+              label: context => ` ${context.parsed.x.toLocaleString("ko-KR", {
+                minimumFractionDigits: decimalPlaces,
+                maximumFractionDigits: decimalPlaces
+              })} ${unit}`
+            }
+          }
+        },
+        scales: {
+          x: {
+            beginAtZero: true, // 요구사항: 모든 차트 축은 반드시 0부터 시작
+            min: 0,
+            max: maxValue * 1.12, // 최대 막대 오른쪽에 값/툴팁 공간 확보
+            grid: { color: "#eef1f5", drawBorder: false },
+            border: { display: false },
+            ticks: {
+              color: "#98a1ad",
+              maxTicksLimit: 5,
+              font: { size: 11 },
+              callback: value => Number(value).toLocaleString("ko-KR")
+            },
+            title: { display: false }
+          },
+          y: {
+            grid: { display: false },
+            border: { display: false },
+            ticks: { color: "#596273", font: { size: 12, weight: "600" } }
+          }
+        }
+      }
+    });
+  }
+
+  // 세 차트 생성
+  createHorizontalBarChart("emissionsChart", "emissions", "kg CO₂eq", 2);
+  createHorizontalBarChart("waterChart", "water", "L", 2);
+  createHorizontalBarChart("landChart", "land", "m²", 2);
+</script>
+</body>
+</html>
